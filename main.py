@@ -8,7 +8,7 @@ from github import Github
 from PIL import Image
 
 # Load environment variables for GitHub credentials
-username = os.getenv("GITHUB_USERNAME")
+username = os.getenv("barad5036")
 token = os.getenv("GITHUB_TOKEN")
 repo_name = "FD.1"
 
