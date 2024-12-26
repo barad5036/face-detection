@@ -4,3 +4,4 @@ mtcnn
 pillow
 github
 numpy
+aiohttp
