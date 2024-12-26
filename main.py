@@ -10,7 +10,7 @@ from PIL import Image
 # Load environment variables for GitHub credentials securely
 username = os.getenv("barad5036")
 token = os.getenv("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")
-repo_name = "FD.1"  # GitHub repository name
+repo_name = "face-detection"  # GitHub repository name
 
 # Set up Streamlit interface
 st.title("Face Detection")
