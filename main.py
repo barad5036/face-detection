@@ -7,10 +7,10 @@ import os
 from github import Github
 from PIL import Image
 
-# Load environment variables for GitHub credentials
+# Load environment variables for GitHub credentials securely
 username = os.getenv("barad5036")
-token = os.getenv("GITHUB_TOKEN")
-repo_name = "FD.1"
+token = os.getenv("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")
+repo_name = "FD.1"  # GitHub repository name
 
 # Set up Streamlit interface
 st.title("Face Detection")
@@ -58,40 +58,46 @@ if camera_image:
         st.image(result, caption="Processed Image")
         st.success(f"Detected and saved {count} faces" if count > 0 else "No faces saved")
 
-    # Push detected faces to GitHub
+    # Push detected faces to GitHub if credentials are available
     if username and token:
-        g = Github(token)
-        repo = g.get_user().get_repo(repo_name)
+        try:
+            g = Github(token)
+            repo = g.get_user().get_repo(repo_name)
 
-        for file_name in os.listdir(detected_faces_dir):
-            file_path = os.path.join(detected_faces_dir, file_name)
-            with open(file_path, "rb") as file:
-                content = file.read()
+            for file_name in os.listdir(detected_faces_dir):
+                file_path = os.path.join(detected_faces_dir, file_name)
+                with open(file_path, "rb") as file:
+                    content = file.read()
 
-            try:
-                existing_file = repo.get_contents(f"{detected_faces_dir}/{file_name}", ref="main")
-                sha = existing_file.sha
-            except Exception:
-                sha = None
+                try:
+                    # Check if the file exists in the GitHub repo
+                    existing_file = repo.get_contents(f"{detected_faces_dir}/{file_name}", ref="main")
+                    sha = existing_file.sha
+                except Exception as e:
+                    sha = None
 
-            try:
-                if sha is None:
-                    repo.create_file(
-                        f"{detected_faces_dir}/{file_name}",
-                        f"Add {file_name}",
-                        content,
-                        branch="main"
-                    )
-                else:
-                    repo.update_file(
-                        f"{detected_faces_dir}/{file_name}",
-                        f"Update {file_name}",
-                        content,
-                        sha,
-                        branch="main"
-                    )
-            except Exception as e:
-                st.error(f"Error pushing file {file_name}: {e}")
+                try:
+                    # Upload new file or update existing one in GitHub repository
+                    if sha is None:
+                        repo.create_file(
+                            f"{detected_faces_dir}/{file_name}",
+                            f"Add {file_name}",
+                            content,
+                            branch="main"
+                        )
+                    else:
+                        repo.update_file(
+                            f"{detected_faces_dir}/{file_name}",
+                            f"Update {file_name}",
+                            content,
+                            sha,
+                            branch="main"
+                        )
+                    st.success(f"Uploaded {file_name} to GitHub!")
+                except Exception as e:
+                    st.error(f"Error pushing file {file_name} to GitHub: {e}")
+        except Exception as e:
+            st.error(f"Error with GitHub credentials: {e}")
     else:
         st.warning("GitHub credentials are not configured.")
 
